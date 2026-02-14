@@ -115,7 +115,7 @@ public class PaletteManager {
         Minecraft client = Minecraft.getInstance();
 
         if (client.getWindow() != null) {
-            long window = client.getWindow().getWindow();
+            long window = client.getWindow().handle();
             String clipboardContent = GLFW.glfwGetClipboardString(window);
             if(clipboardContent == null)
                 return;

@@ -10,14 +10,20 @@ import com.mocretion.blockpalettes.gui.ButtonInfo;
 import com.mocretion.blockpalettes.gui.draw.CustomDrawContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
@@ -29,10 +35,10 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class PaletteListScreen extends Screen {
-    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/palette_list.png");
-    private static final ResourceLocation PALETTE_PREVIEW_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/palette_preview.png");
-    private static final ResourceLocation ADD_PALETTE_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/add_palette.png");
-    private static final ResourceLocation SCROLLER_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/scroller.png");
+    private static final Identifier BG_TEXTURE = Identifier .fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/palette_list.png");
+    private static final Identifier PALETTE_PREVIEW_TEXTURE = Identifier .fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/palette_preview.png");
+    private static final Identifier ADD_PALETTE_TEXTURE = Identifier .fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/add_palette.png");
+    private static final Identifier SCROLLER_TEXTURE = Identifier.fromNamespaceAndPath(BlockPalettesClient.MOD_ID, "textures/gui/scroller.png");
     // GUI dimensions
     private final int backgroundWidth = 195;
     private final int backgroundHeight = 256;
@@ -130,7 +136,7 @@ public class PaletteListScreen extends Screen {
         super.renderBackground(context, mouseX, mouseY, delta);
 
         // Draw background
-        context.blit(RenderType::guiTextured, BG_TEXTURE, leftPos, topPos, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, leftPos, topPos, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
     }
 
     @Override
@@ -141,11 +147,11 @@ public class PaletteListScreen extends Screen {
         // Draw title
         context.drawString(this.font, this.title,
                 leftPos + (backgroundWidth - font.width(this.title)) / 2,
-                topPos + 6, 0x404040, false);
+                topPos + 6, 0xff404040, false);
 
         // Draw scroller
         final int scrollLevel = (int)scrollPosition;
-        context.blit(RenderType::guiTextured, SCROLLER_TEXTURE, leftPos + scrollMarginX, getCurrentScrollerYPosition(), 0, 0, scrollerWidth, scrollerHeight, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, leftPos + scrollMarginX, getCurrentScrollerYPosition(), 0, 0, scrollerWidth, scrollerHeight, 256, 256);
 
         // Draw searchText
         String editedSearchText = searchText;
@@ -155,7 +161,7 @@ public class PaletteListScreen extends Screen {
         context.drawString(this.font, editedSearchText,
                 leftPos + paletteSearchMarginX,
                 topPos + paletteSearchMarginY,
-                this.markedEntireInput ? 0x539de6 : 0xffffff, true);
+                this.markedEntireInput ? 0xff539de6 : 0xffffffff, true);
 
         // Draw visual inventory slots
         List<Palette> palettes = PaletteManager.getBuilderPalettes(searchText);
@@ -192,15 +198,15 @@ public class PaletteListScreen extends Screen {
             int yPos = topPos + paletteContainerStartHeight + slotNo * paletteItemHeight;
 
             if(paletteNo == palettes.size()){  // Add new element
-                context.blit(RenderType::guiTextured, ADD_PALETTE_TEXTURE, xPos, yPos, 0, 0, paletteItemWidth, paletteItemHeight, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, ADD_PALETTE_TEXTURE, xPos, yPos, 0, 0, paletteItemWidth, paletteItemHeight, 256, 256);
 
                 if(isPointInRegion(xPos, yPos, paletteItemWidth, paletteItemHeight, mouseX, mouseY)){
-                    context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.addPalette").toFlatList(), mouseX, mouseY);
+                    context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.addPalette").toFlatList(), mouseX, mouseY);
                 }
 
             }else if(paletteNo < palettes.size()){  // List existing element
                 Palette palette = palettes.get(paletteNo);
-                context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, 0, paletteItemWidth, paletteItemHeight, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, 0, paletteItemWidth, paletteItemHeight, 256, 256);
 
                 customDrawContext.drawItem(palette.getIcon(), xPos + paletteItemIconMargin + 8, yPos + paletteItemIconMargin + 8, 32F);
 
@@ -238,20 +244,20 @@ public class PaletteListScreen extends Screen {
 
                 // Draw selected texture
                 if(PaletteManager.isPaletteSelected(palette)){
-                    context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, paletteItemHeight * 2, paletteItemWidth, paletteItemHeight, 256, 256);
+                    context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, paletteItemHeight * 2, paletteItemWidth, paletteItemHeight, 256, 256);
 
                     if(!PaletteManager.getIsEnabled()){
-                        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, paletteItemHeight * 3, paletteItemWidth, paletteItemHeight, 256, 256);
+                        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 0, paletteItemHeight * 3, paletteItemWidth, paletteItemHeight, 256, 256);
                     }
                 }
 
                 // Draw selected hotbar slot
                 ButtonInfo btnInfo = ButtonCatalogue.getSelectionButton(palette.getHotbarSlot() - 1);
-                context.blit(RenderType::guiTextured, btnInfo.identifier, xPos + paletteHotbarMarginX + ButtonCatalogue.smallButtonSize * (palette.getHotbarSlot() - 1), yPos + paletteHotbarMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, xPos + paletteHotbarMarginX + ButtonCatalogue.smallButtonSize * (palette.getHotbarSlot() - 1), yPos + paletteHotbarMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
 
                 context.drawString(this.font, Component.literal(palette.getShortenedName(this.font, maxPaletteTitleWidth)),
                         xPos + paletteItemTitleMarginX,
-                        yPos + paletteItemTitleMarginY, 0x404040, false);
+                        yPos + paletteItemTitleMarginY, 0xff404040, false);
 
             }else{
                 break;
@@ -269,15 +275,15 @@ public class PaletteListScreen extends Screen {
                 int xPos = leftPos + paletteContainerStartWidth + paletteSmallItemWidth * columnNo;
 
                 if (paletteNo == palettes.size()) {  // Add new element
-                    context.blit(RenderType::guiTextured, ADD_PALETTE_TEXTURE, xPos, yPos, 202, 0, paletteSmallItemWidth, paletteItemHeight, 256, 256);
+                    context.blit(RenderPipelines.GUI_TEXTURED, ADD_PALETTE_TEXTURE, xPos, yPos, 202, 0, paletteSmallItemWidth, paletteItemHeight, 256, 256);
 
                     if (isPointInRegion(xPos, yPos, paletteSmallItemWidth, paletteItemHeight, mouseX, mouseY)) {
-                        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.addPalette").toFlatList(), mouseX, mouseY);
+                        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.addPalette").toFlatList(), mouseX, mouseY);
                     }
 
                 } else if (paletteNo < palettes.size()) {  // List existing element
                     Palette palette = palettes.get(paletteNo);
-                    context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, 0, paletteSmallItemWidth, paletteItemHeight, 256, 256);
+                    context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, 0, paletteSmallItemWidth, paletteItemHeight, 256, 256);
 
                     // Draw icon
                     context.renderItem(palette.getIcon(), xPos + paletteSmallItemIconMargin, yPos + paletteSmallItemIconMargin);
@@ -302,20 +308,20 @@ public class PaletteListScreen extends Screen {
 
                     // Draw selected texture
                     if (PaletteManager.isPaletteSelected(palette)) {
-                        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, paletteItemHeight * 2, paletteSmallItemWidth, paletteItemHeight, 256, 256);
+                        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, paletteItemHeight * 2, paletteSmallItemWidth, paletteItemHeight, 256, 256);
 
                         if (!PaletteManager.getIsEnabled()) {
-                            context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, paletteItemHeight * 3, paletteSmallItemWidth, paletteItemHeight, 256, 256);
+                            context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, xPos, yPos, 202, paletteItemHeight * 3, paletteSmallItemWidth, paletteItemHeight, 256, 256);
                         }
                     }
 
                     // Draw selected hotbar slot
                     ButtonInfo btnInfo = ButtonCatalogue.getSelectionButtonXs(palette.getHotbarSlot() - 1);
-                    context.blit(RenderType::guiTextured, btnInfo.identifier, xPos + paletteSmallHotbarMarginX + ButtonCatalogue.xsButtonSize * ((palette.getHotbarSlot() - 1) % 3), yPos + paletteSmallHotbarMarginY + (palette.getHotbarSlot() - 1) / 3 * ButtonCatalogue.xsButtonSize, btnInfo.u, btnInfo.v, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, 256, 256);
+                    context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, xPos + paletteSmallHotbarMarginX + ButtonCatalogue.xsButtonSize * ((palette.getHotbarSlot() - 1) % 3), yPos + paletteSmallHotbarMarginY + (palette.getHotbarSlot() - 1) / 3 * ButtonCatalogue.xsButtonSize, btnInfo.u, btnInfo.v, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, 256, 256);
 
                     context.drawString(this.font, Component.literal(palette.getShortenedName(this.font, maxPaletteSmallTitleWidth)),
                             xPos + paletteSmallItemTitleMarginX,
-                            yPos + paletteSmallItemTitleMarginY, 0x404040, false);
+                            yPos + paletteSmallItemTitleMarginY, 0xff404040, false);
 
                 } else {
                     break;
@@ -326,60 +332,61 @@ public class PaletteListScreen extends Screen {
 
     private void renderEditHoverButton(GuiGraphics context, int mouseX, int mouseY, int posXEdit, int posYEdit, int posXBg, int posYBg){
         ButtonInfo btnInfo = ButtonCatalogue.getEditHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, posXEdit, posYEdit, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
-        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.editPalette").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, posXEdit, posYEdit, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.editPalette").toFlatList(), mouseX, mouseY);
     }
 
     private void renderDeleteConfirmButton(GuiGraphics context, int mouseX, int mouseY, int posXDel, int posYDel, int posXBg, int posYBg){
         ButtonInfo btnInfo = ButtonCatalogue.getDeleteConfirm();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, posXDel, posYDel + 1, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
-        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.deletePalette").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, posXDel, posYDel + 1, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.deletePalette").toFlatList(), mouseX, mouseY);
     }
 
     public void renderDeleteHoverButton(GuiGraphics context, int mouseX, int mouseY, int posXDel, int posYDel, int posXBg, int posYBg){
         ButtonInfo btnInfo = ButtonCatalogue.getDeleteHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, posXDel, posYDel, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
-        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.deletePalette").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, posXDel, posYDel, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.deletePalette").toFlatList(), mouseX, mouseY);
     }
 
     public void renderHotbarTooltip(GuiGraphics context, int mouseX, int mouseY){
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.selectHotbarSlot").toFlatList(), mouseX, mouseY);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.selectHotbarSlot").toFlatList(), mouseX, mouseY);
     }
 
     public void renderPaletteHoverButton(GuiGraphics context, int mouseX, int mouseY, int posXBg, int posYBg, Palette palette){
-        context.blit(RenderType::guiTextured, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, PALETTE_PREVIEW_TEXTURE, posXBg, posYBg, PaletteManager.isLargeMenu() ? 0 : 202, paletteItemHeight, PaletteManager.isLargeMenu() ? paletteItemWidth : paletteSmallItemWidth, paletteItemHeight, 256, 256);
 
         List<FormattedCharSequence> paletteNameTooltip = new ArrayList<>();
         paletteNameTooltip.add(Component.literal(palette.getName()).getVisualOrderText());
         paletteNameTooltip.add(Component.translatable("container.blockpalettes.paletteIcon").append("§8" + palette.getIconName()).getVisualOrderText());
-        context.renderTooltip(this.font, paletteNameTooltip, mouseX, mouseY);
+
+        context.setTooltipForNextFrame(this.font, paletteNameTooltip, mouseX, mouseY);
     }
 
     private void renderToggleHoverButton(GuiGraphics context, int mouseX, int mouseY){
         ButtonInfo btnInfo = ButtonCatalogue.getTogglePalettesHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, leftPos + paletteToggleEnabledMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, leftPos + paletteToggleEnabledMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
 
         List<FormattedCharSequence> togglePaletteTooltip = new ArrayList<>();
         togglePaletteTooltip.add(Component.translatable("container.blockpalettes.togglePalettes").getVisualOrderText());
         togglePaletteTooltip.add(Component.empty().getVisualOrderText());
         togglePaletteTooltip.add(Component.translatable("container.blockpalettes.currentState").append(PaletteManager.getIsEnabled() ? Component.translatable("container.blockpalettes.enabled") : Component.translatable("container.blockpalettes.disabled")).getVisualOrderText());
 
-        context.renderTooltip(this.font, togglePaletteTooltip, mouseX, mouseY);
+        context.setTooltipForNextFrame(this.font, togglePaletteTooltip, mouseX, mouseY);
     }
 
     private void renderDeselectAllHoverButton(GuiGraphics context, int mouseX, int mouseY){
         ButtonInfo btnInfo = ButtonCatalogue.getDeselectAllHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, leftPos + paletteDeselectAllMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.deselectPalettes").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, leftPos + paletteDeselectAllMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.deselectPalettes").toFlatList(), mouseX, mouseY);
     }
 
     private void renderImportHoverButton(GuiGraphics context, int mouseX, int mouseY){
         ButtonInfo btnInfo = ButtonCatalogue.getImportHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, leftPos + paletteImportMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.importPalette").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, leftPos + paletteImportMarginX, topPos + paletteButtonMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.importPalette").toFlatList(), mouseX, mouseY);
     }
 
     private void renderSearchbarTooltip(GuiGraphics context, int mouseX, int mouseY){
@@ -388,66 +395,66 @@ public class PaletteListScreen extends Screen {
         searchbarTooltip.add(Component.empty().getVisualOrderText());
         searchbarTooltip.add(Component.translatable("container.blockpalettes.filterPalettesByNameInfo").getVisualOrderText());
 
-        context.renderTooltip(this.font, searchbarTooltip, mouseX, mouseY);
+        context.setTooltipForNextFrame(this.font, searchbarTooltip, mouseX, mouseY);
     }
 
     private void renderLayoutToggleButton(GuiGraphics context, int mouseX, int mouseY){
         ButtonInfo btnInfo = ButtonCatalogue.getToggleLayoutHover();
-        context.blit(RenderType::guiTextured, btnInfo.identifier, leftPos + paletteChangeLayoutMarginX, topPos + paletteChangeLayoutMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, 256, 256);
-        context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.toggleLayout").toFlatList(), mouseX, mouseY);
+        context.blit(RenderPipelines.GUI_TEXTURED, btnInfo.identifier, leftPos + paletteChangeLayoutMarginX, topPos + paletteChangeLayoutMarginY, btnInfo.u, btnInfo.v, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, 256, 256);
+        context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.toggleLayout").toFlatList(), mouseX, mouseY);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean doubled) {
 
         isInputSelected = false;
         selectedInputBlink = 0;
         markedEntireInput = false;
 
         // Toggle Palette Enabled
-        if(isPointInRegion(leftPos + paletteToggleEnabledMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseX, (int)mouseY)){
+        if(isPointInRegion(leftPos + paletteToggleEnabledMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())){
             PaletteManager.toggleEnabled();
             playButtonClickSound();
             return true;
         }  // Deselect all palettes
-        else if(isPointInRegion(leftPos + paletteDeselectAllMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseX, (int)mouseY)){
+        else if(isPointInRegion(leftPos + paletteDeselectAllMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())){
             PaletteManager.deselectAllPalettes();
             playButtonClickSound();
             return true;
         }  // Import palette
-        else if(isPointInRegion(leftPos + paletteImportMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseX, (int)mouseY)){
+        else if(isPointInRegion(leftPos + paletteImportMarginX, topPos + paletteButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())){
             PaletteManager.importPalette();
             playButtonClickSound();
             return true;
         }  // Clicked on scroller
-        else if(isPointInRegion(leftPos + scrollMarginX, getCurrentScrollerYPosition(), scrollerWidth, scrollerHeight, (int)mouseX, (int)mouseY)) {
+        else if(isPointInRegion(leftPos + scrollMarginX, getCurrentScrollerYPosition(), scrollerWidth, scrollerHeight, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())) {
             clickedOnScroller = true;
             return true;
         }  // Clicked on searchbar
-        else if(isPointInRegion(leftPos + paletteSearchMarginX, topPos + paletteSearchMarginY, paletteSearchWidth, paletteSearchHeight, (int)mouseX, (int)mouseY)){
+        else if(isPointInRegion(leftPos + paletteSearchMarginX, topPos + paletteSearchMarginY, paletteSearchWidth, paletteSearchHeight, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())){
             isInputSelected = true;
             selectedInputBlink = 0;
             markedEntireInput = false;
             return true;
         }  // Clicked on layout toggle
-        else if(isPointInRegion(leftPos + paletteChangeLayoutMarginX, topPos + paletteChangeLayoutMarginY, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, (int)mouseX, (int)mouseY)){
+        else if(isPointInRegion(leftPos + paletteChangeLayoutMarginX, topPos + paletteChangeLayoutMarginY, ButtonCatalogue.xsButtonSize, ButtonCatalogue.xsButtonSize, (int)mouseButtonEvent.x(), (int)mouseButtonEvent.y())){
             PaletteManager.toggleLayout();
             playButtonClickSound();
             return true;
         }
 
         if(PaletteManager.isLargeMenu()) {
-            if (mouseClickLarge(mouseX, mouseY)) {
+            if (mouseClickLarge(mouseButtonEvent.x(), mouseButtonEvent.y())) {
                 return true;
             }
         }
         else {
-            if (mouseClickSmall(mouseX, mouseY)) {
+            if (mouseClickSmall(mouseButtonEvent.x(), mouseButtonEvent.y())) {
                 return true;
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseButtonEvent, doubled);
     }
 
     public boolean mouseClickLarge(double mouseX, double mouseY){
@@ -608,7 +615,11 @@ public class PaletteListScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+
+        var keyCode = keyEvent.key();
+        var modifiers = keyEvent.modifiers();
+        var scanCode = keyEvent.scancode();
 
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             client.setScreen(null);
@@ -636,11 +647,13 @@ public class PaletteListScreen extends Screen {
             return false;
         }
 
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(keyEvent);
     }
 
     @Override
-    public boolean charTyped(char ch, int modifiers) {
+    public boolean charTyped(CharacterEvent characterEvent) {
+
+        var ch = characterEvent.codepointAsString();
 
         if (isInputSelected) {
 
@@ -659,18 +672,18 @@ public class PaletteListScreen extends Screen {
 
         }
 
-        return super.charTyped(ch, modifiers);
+        return super.charTyped(characterEvent);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
 
-        if (button == 0 && clickedOnScroller){
+        if (mouseButtonEvent.button() == 0 && clickedOnScroller){
             clickedOnScroller = false;
             return true;
         }
 
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mouseButtonEvent);
     }
 
     @Override

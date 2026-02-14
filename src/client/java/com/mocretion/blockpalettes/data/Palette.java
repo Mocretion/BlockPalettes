@@ -191,7 +191,7 @@ public class Palette {
     public void exportToClipboard(){
         Minecraft client = Minecraft.getInstance();
         if (client.getWindow() != null) {
-            long window = client.getWindow().getWindow();
+            long window = client.getWindow().handle();
             GLFW.glfwSetClipboardString(window, JsonHelper.jsonToString(toJson(), true));
         }
     }
