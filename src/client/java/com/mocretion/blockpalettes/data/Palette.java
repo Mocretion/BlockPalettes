@@ -14,7 +14,8 @@ import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.lwjgl.glfw.GLFW;
@@ -178,13 +179,13 @@ public class Palette {
                     ItemStack playerStack = playerInv.getNonEquipmentItems().get(i);
 
                     if (ItemStack.isSameItemSameComponents(playerStack, randomStack)) {
-                        Minecraft.getInstance().gameMode.handleInventoryMouseClick(screenHandler.containerId, slot, hotbarSlot, ClickType.SWAP, player);
+                        Minecraft.getInstance().gameMode.handleContainerInput(screenHandler.containerId, slot, hotbarSlot, ContainerInput.SWAP, player);
                         return;
                     }
                 }
             }
 
-            player.displayClientMessage(Component.literal("§cBlock Palettes: " + randomStack.getDisplayName().getString()).append(Component.translatable("container.blockpalettes.itemNotFound")), true);
+            player.sendOverlayMessage(Component.literal("§cBlock Palettes: " + randomStack.getDisplayName().getString()).append(Component.translatable("container.blockpalettes.itemNotFound")));
         }
     }
 

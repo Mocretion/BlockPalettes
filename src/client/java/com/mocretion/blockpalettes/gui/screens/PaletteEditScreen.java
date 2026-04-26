@@ -9,7 +9,7 @@ import com.mocretion.blockpalettes.gui.ButtonInfo;
 import com.mocretion.blockpalettes.gui.screens.menutypes.EditMenu;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -132,27 +132,27 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
     }
 
     @Override
-    protected void renderLabels(GuiGraphics guiGraphics, int i, int j) {
+    protected void extractLabels(GuiGraphicsExtractor GuiGraphicsExtractor, int i, int j) {
 
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta){
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta){
 
-        super.renderBackground(context, mouseX, mouseY, delta);
+        super.extractBackground(context, mouseX, mouseY, delta);
 
         // Draw background
         context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, leftPos, topPos, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
     }
 
-    @Override
-    protected void renderBg(GuiGraphics guiGraphics, float f, int i, int j) {
-    }
+    //@Override
+    //protected void renderBg(GuiGraphicsExtractor GuiGraphicsExtractor, float f, int i, int j) {
+    //}
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
 
         //renderBackground(context, mouseX, mouseY, delta);
 
@@ -166,7 +166,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
             }
         }
 
-        context.drawString(minecraft.font, titleText,
+        context.text(minecraft.font, titleText,
                 leftPos + titleInputMarginX,
                 topPos + titleInputMarginY, this.markedEntireInput && this.selectedInput == -1 ? 0xff539de6 : 0xffffffff, true);
 
@@ -182,7 +182,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
             context.fill(leftPos + iconMarginX, topPos + iconMarginY, leftPos + iconMarginX + 16, topPos + iconMarginY + 16, 0x80FFFFFF);
             context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.icon").toFlatList(), mouseX, mouseY);
         }
-        context.renderItem(palette.getIcon(), leftPos + iconMarginX, topPos + iconMarginY);
+        context.item(palette.getIcon(), leftPos + iconMarginX, topPos + iconMarginY);
 
         // Draw export hover
         if(isPointInRegion(leftPos + exportButtonMarginX, topPos + exportButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseX, (int)mouseY)) {
@@ -227,7 +227,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                     }
                 }
 
-                context.drawString(this.font, weightText,
+                context.text(this.font, weightText,
                         xPos + weightTextInputMarginX,
                         yPos + weightTextInputMarginY,
                         this.markedEntireInput && this.selectedInput == rowInfo.weightCategoryId ? 0xff539de6 : 0xffffffff, true);
@@ -286,7 +286,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                 for (int itemNo = 0; itemNo < rowInfo.items.size(); itemNo++) {
 
                     ItemStack item = rowInfo.items.get(itemNo);
-                    context.renderItem(item, xPos + itemNo * itemSlotSize + 1, yPos + 1);
+                    context.item(item, xPos + itemNo * itemSlotSize + 1, yPos + 1);
                 }
 
                 // Draw tooltip and hover effect
@@ -348,8 +348,8 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                 // Draw the slot content
                 ItemStack stack = player.getInventory().getItem(slotIndex);
                 if (!stack.isEmpty()) {
-                    context.renderItem(stack, slotX, slotY);
-                    context.renderItemDecorations(this.font, stack, slotX, slotY);
+                    context.item(stack, slotX, slotY);
+                    context.itemDecorations(this.font, stack, slotX, slotY);
                 }
             }
         }
@@ -362,14 +362,14 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
             // Draw the slot content
             ItemStack stack = player.getInventory().getItem(col);
             if (!stack.isEmpty()) {
-                context.renderItem(stack, slotX, slotY);
-                context.renderItemDecorations(this.font, stack, slotX, slotY);
+                context.item(stack, slotX, slotY);
+                context.itemDecorations(this.font, stack, slotX, slotY);
             }
         }
 
         // Draw dragged item
         if (!draggedStack.isEmpty()) {
-            context.renderItem(draggedStack, mouseX - 8, mouseY - 8, 0);
+            context.item(draggedStack, mouseX - 8, mouseY - 8, 0);
         }
 
         // Draw tooltip

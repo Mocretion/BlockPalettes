@@ -6,25 +6,17 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.render.state.GuiItemRenderState;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.item.TrackingItemStackRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix3x2f;
 import org.joml.Matrix3x2fStack;
 
 public class CustomDrawContext {
 
-    private final GuiGraphics context;
+    private final GuiGraphicsExtractor context;
     private final Minecraft client;
 
-    public CustomDrawContext(Minecraft client, GuiGraphics context) {
+    public CustomDrawContext(Minecraft client, GuiGraphicsExtractor context) {
         this.client = client;
         this.context = context;
     }
@@ -36,7 +28,7 @@ public class CustomDrawContext {
             pose.pushMatrix();
             pose.translate(x - 8, y - 8);
             pose.scale(scale / 16, scale / 16);
-            context.renderItem(stack, 0, 0);
+            context.item(stack, 0, 0);
             pose.popMatrix();
 
 //            TrackingItemStackRenderState trackingItemStackRenderState = new TrackingItemStackRenderState();
