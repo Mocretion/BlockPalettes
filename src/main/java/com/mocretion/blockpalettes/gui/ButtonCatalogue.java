@@ -1,12 +1,12 @@
 package com.mocretion.blockpalettes.gui;
 
 import com.mocretion.blockpalettes.BlockPalettes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ButtonCatalogue {
 
-    private static final ResourceLocation BUTTON_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettes.MOD_ID, "textures/gui/buttons.png");
-    private static final ResourceLocation HUD_TEXTURE = ResourceLocation.fromNamespaceAndPath(BlockPalettes.MOD_ID, "textures/gui/hotbar_hud.png");
+    private static final Identifier BUTTON_TEXTURE = Identifier.fromNamespaceAndPath(BlockPalettes.MOD_ID, "textures/gui/buttons.png");
+    private static final Identifier HUD_TEXTURE = Identifier.fromNamespaceAndPath(BlockPalettes.MOD_ID, "textures/gui/hotbar_hud.png");
 
     public static final int smallButtonSize = 14;
     public static final int xsButtonSize = 10;

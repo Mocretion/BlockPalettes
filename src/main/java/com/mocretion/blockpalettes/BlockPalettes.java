@@ -3,7 +3,7 @@ package com.mocretion.blockpalettes;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
@@ -57,7 +57,7 @@ public class BlockPalettes
     private static final List<PendingBlockCheck> pendingChecks = new ArrayList<>();
 
     public static final RandomSource random = RandomSource.create();
-    private static final ResourceLocation SELECTED_SLOT_HOTBAR = ResourceLocation.fromNamespaceAndPath(MOD_ID, "selected-slots-hotbar");
+    private static final Identifier SELECTED_SLOT_HOTBAR = Identifier.fromNamespaceAndPath(MOD_ID, "selected-slots-hotbar");
 
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
@@ -78,7 +78,7 @@ public class BlockPalettes
                 KeyConflictContext.IN_GAME,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
-                "category.blockpalettes.keys"
+                KeyMapping.Category.register(Identifier.fromNamespaceAndPath(MOD_ID, "keys"))
         );
 
         // Register the key binding
@@ -89,7 +89,7 @@ public class BlockPalettes
         event.registerAbove(VanillaGuiLayers.HOTBAR, SELECTED_SLOT_HOTBAR, new HudRenderer()::render);
     }
 
-    @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT)
     public static class ClientGameEvents
     {
         @SubscribeEvent
