@@ -15,14 +15,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.HudLayerRegistrationCallback;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -70,7 +70,7 @@ public class BlockPalettesClient implements ClientModInitializer {
 					"key.blockpalettes.open_palettes_screen",
 					InputConstants.Type.KEYSYM,
 					GLFW.GLFW_KEY_B, // B to open palettes
-					"category.blockpalettes.keys"
+					"key.category.blockpalettes.keys"
 			));
 		}
 
@@ -131,7 +131,7 @@ public class BlockPalettesClient implements ClientModInitializer {
 
 		});
 
-		HudLayerRegistrationCallback.EVENT.register(new HudRenderer()::renderHudAdditions);
+		HudElementRegistry.addLast(ResourceLocation.fromNamespaceAndPath(MOD_ID, "block_palettes"), HudRenderer::render);
 	}
 
 	private void onBlockPlaced(Player player) {
