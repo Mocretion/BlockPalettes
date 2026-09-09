@@ -14,7 +14,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -139,7 +139,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
         super.renderBackground(context, mouseX, mouseY, delta);
 
         // Draw background
-        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, leftPos, topPos, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
+        context.blit(RenderType::guiTextured, BG_TEXTURE, leftPos, topPos, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
     }
 
     @Override
@@ -165,10 +165,10 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
 
         context.drawString(this.font, titleText,
                 leftPos + titleInputMarginX,
-                topPos + titleInputMarginY, this.markedEntireInput && this.selectedInput == -1 ? 0xff539de6 : 0xffffffff, true);
+                topPos + titleInputMarginY, this.markedEntireInput && this.selectedInput == -1 ? 0x539de6 : 0xffffff, true);
 
         if(isPointInRegion(leftPos + titleInputMarginX, topPos + titleInputMarginY, titleInputWidth, titleInputHeight, (int) mouseX, (int) mouseY)) {
-            context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.editTitle").toFlatList(), mouseX, mouseY);
+            context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.editTitle").toFlatList(), mouseX, mouseY);
         }
 
         // Draw Upper Inventory
@@ -177,21 +177,21 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
         // Draw icon
         if(isPointInRegion(leftPos + iconMarginX, topPos + iconMarginY, itemSlotSize, itemSlotSize, (int) mouseX, (int) mouseY)) {
             context.fill(leftPos + iconMarginX, topPos + iconMarginY, leftPos + iconMarginX + 16, topPos + iconMarginY + 16, 0x80FFFFFF);
-            context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.icon").toFlatList(), mouseX, mouseY);
+            context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.icon").toFlatList(), mouseX, mouseY);
         }
         context.renderItem(palette.getIcon(), leftPos + iconMarginX, topPos + iconMarginY);
 
         // Draw export hover
         if(isPointInRegion(leftPos + exportButtonMarginX, topPos + exportButtonMarginY, ButtonCatalogue.smallButtonSize, ButtonCatalogue.smallButtonSize, (int)mouseX, (int)mouseY)) {
             ButtonInfo texture = ButtonCatalogue.getExportHover();
-            context.blit(RenderPipelines.GUI_TEXTURED, texture.identifier, leftPos + exportButtonMarginX, topPos + exportButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
-            context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.exportPalette").toFlatList(), mouseX, mouseY);
+            context.blit(RenderType::guiTextured, texture.identifier, leftPos + exportButtonMarginX, topPos + exportButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
+            context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.exportPalette").toFlatList(), mouseX, mouseY);
         }
 
         final int scrollLevel = (int)scrollPosition;
 
         // Draw scroller
-        context.blit(RenderPipelines.GUI_TEXTURED, SCROLLER_TEXTURE, leftPos + scrollMarginX, getCurrentScrollerYPosition(), 0, 0, scrollerWidth, scrollerHeight, 256, 256);
+        context.blit(RenderType::guiTextured, SCROLLER_TEXTURE, leftPos + scrollMarginX, getCurrentScrollerYPosition(), 0, 0, scrollerWidth, scrollerHeight, 256, 256);
 
         int xPos = leftPos + weightContainerStartWidth;
         boolean addedAddBtn = false;
@@ -202,17 +202,17 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
 
             if(rowInfo.isBlank() && !addedAddBtn){  // Add new element
 
-                context.blit(RenderPipelines.GUI_TEXTURED, ADD_WEIGHT_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
+                context.blit(RenderType::guiTextured, ADD_WEIGHT_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
 
                 if(isPointInRegion(xPos, yPos, weightItemsWidth, weightItemsHeight, (int) mouseX, (int) mouseY)) {
-                    context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.addWeight").toFlatList(), mouseX, mouseY);
+                    context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.addWeight").toFlatList(), mouseX, mouseY);
                 }
 
                 addedAddBtn = true;
 
             }else if(rowInfo.isWeightRow()){  // Add weight header
 
-                context.blit(RenderPipelines.GUI_TEXTURED, TEXT_ROW_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
+                context.blit(RenderType::guiTextured, TEXT_ROW_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
 
                 String weightText = weights.get(rowInfo.weightCategoryId).getWeightInputField();
 
@@ -227,7 +227,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                 context.drawString(this.font, weightText,
                         xPos + weightTextInputMarginX,
                         yPos + weightTextInputMarginY,
-                        this.markedEntireInput && this.selectedInput == rowInfo.weightCategoryId ? 0xff539de6 : 0xffffffff, true);
+                        this.markedEntireInput && this.selectedInput == rowInfo.weightCategoryId ? 0x539de6 : 0xffffff, true);
 
                 if(isPointInRegion(xPos + weightTextInputMarginX, yPos + weightTextInputMarginY, weightTextInputWidth, weightTextInputHeight, (int) mouseX, (int) mouseY)) {
                     List<FormattedCharSequence> weightEditTooltip = new ArrayList<>();
@@ -259,25 +259,25 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                         weightEditTooltip.add(Component.translatable("container.blockpalettes.moreDetails").getVisualOrderText());
                     }
 
-                    context.setTooltipForNextFrame(this.font, weightEditTooltip, mouseX, mouseY);
+                    context.renderTooltip(this.font, weightEditTooltip, mouseX, mouseY);
                 }
 
                 // Is hovering over delete
                 if(isPointInRegion(xPos + deleteButtonMarginX, yPos + deleteButtonMarginY, buttonSize, buttonSize, (int) mouseX, (int) mouseY)) {
                     ButtonInfo texture = ButtonCatalogue.getDeleteHover();
-                    context.blit(RenderPipelines.GUI_TEXTURED, texture.identifier, xPos + deleteButtonMarginX, yPos + deleteButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
-                    context.setComponentTooltipForNextFrame(this.font, Component.translatable("container.blockpalettes.deleteWeight").toFlatList(), mouseX, mouseY);
+                    context.blit(RenderType::guiTextured, texture.identifier, xPos + deleteButtonMarginX, yPos + deleteButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
+                    context.renderComponentTooltip(this.font, Component.translatable("container.blockpalettes.deleteWeight").toFlatList(), mouseX, mouseY);
                 }
 
                 // Is selected as delete
                 if(this.deleteConfirm > 0 && this.toBeDeletedId == rowInfo.weightCategoryId){
                     ButtonInfo texture = ButtonCatalogue.getDeleteConfirm();
-                    context.blit(RenderPipelines.GUI_TEXTURED, texture.identifier, xPos + deleteButtonMarginX, yPos + deleteButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
+                    context.blit(RenderType::guiTextured, texture.identifier, xPos + deleteButtonMarginX, yPos + deleteButtonMarginY, texture.u, texture.v, buttonSize, buttonSize, 256, 256);
                 }
 
                 }else if(!rowInfo.isBlank()){  // Add inventory
 
-                context.blit(RenderPipelines.GUI_TEXTURED, INVENTORY_ROW_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
+                context.blit(RenderType::guiTextured, INVENTORY_ROW_TEXTURE, xPos, yPos, 0, 0, weightItemsWidth, weightItemsHeight, 256, 256);
 
                 // Draw items
                 for (int itemNo = 0; itemNo < rowInfo.items.size(); itemNo++) {
@@ -298,7 +298,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
 
                             // Item info tooltip
                             if (!hoveredItem.isEmpty()) {
-                                context.setComponentTooltipForNextFrame(this.font, getTooltipFromItem(this.minecraft, hoveredItem), mouseX, mouseY);
+                                context.renderComponentTooltip(this.font, getTooltipFromItem(this.minecraft, hoveredItem), mouseX, mouseY);
                             }
                         }else{
                             List<FormattedCharSequence> addItemsTooltip = new ArrayList<>();
@@ -312,7 +312,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                                 addItemsTooltip.add(Component.translatable("container.blockpalettes.moreDetails").getVisualOrderText());
                             }
 
-                            context.setTooltipForNextFrame(this.font, addItemsTooltip, mouseX, mouseY);
+                            context.renderTooltip(this.font, addItemsTooltip, mouseX, mouseY);
 
                         }
                     }
@@ -366,7 +366,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
 
         // Draw dragged item
         if (!draggedStack.isEmpty()) {
-            context.renderItem(draggedStack, mouseX - 8, mouseY - 8, 0);
+            context.renderItem(draggedStack, mouseX - 8, mouseY - 8, 0, 100);
         }
 
         // Draw tooltip
@@ -378,7 +378,7 @@ public class PaletteEditScreen extends AbstractContainerScreen<EditMenu> impleme
                 stack = player.getInventory().getItem(slotIndex);
 
                 if (!stack.isEmpty()) {
-                    context.setComponentTooltipForNextFrame(this.font, getTooltipFromItem(this.minecraft, stack), mouseX, mouseY);
+                    context.renderComponentTooltip(this.font, getTooltipFromItem(this.minecraft, stack), mouseX, mouseY);
                 }
             }
         }
