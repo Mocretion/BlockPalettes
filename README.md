@@ -1,3 +1,7 @@
+## Download
+Check the [Releases](https://github.com/Mocretion/BlockPalettes/releases)
+or download at [Modrinth](https://modrinth.com/mod/block-palettes/versions) or [Curseforge](https://www.curseforge.com/minecraft/mc-mods/block-palettes/files/all?page=1&pageSize=20&showAlphaFiles=show)
+
 ## What it does
 This **client side** mod **shuffles** your **hotbar** items based on from you defined and selected "block palettes".
 
